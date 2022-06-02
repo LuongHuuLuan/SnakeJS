@@ -1,0 +1,368 @@
+* {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  overflow: hidden;
+}
+
+.start-screen {
+  width: 100vw;
+  height: 100vh;
+  background-image: radial-gradient(at right bottom, #476CFF, #FFEF5C);
+}
+.start-screen h1 {
+  color: white;
+  font-size: 70px;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.start-screen .snake-icon {
+  text-align: center;
+  padding-top: 20px;
+}
+.start-screen .snake-icon img {
+  width: 25%;
+  margin: auto;
+  background-image: repeating-radial-gradient(at right bottom, #1EADF0, #0AFB60);
+  border-radius: 50%;
+}
+.start-screen .btn-play {
+  font-size: 30px;
+  width: fit-content;
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  color: black;
+  background-color: white;
+  padding: 10px;
+  border-radius: 16px;
+  cursor: pointer;
+}
+.start-screen .btn-play:before {
+  content: "";
+  clip-path: polygon(100% 50%, 0 0, 0 100%);
+  background-color: red;
+  width: 20px;
+  height: 30px;
+  margin-right: 10px;
+}
+.start-screen .btn-play:hover {
+  opacity: 0.8;
+}
+.start-screen .game-options {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.start-screen .game-options .level, .start-screen .game-options .mode {
+  font-size: 30px;
+  margin: 0 20px;
+}
+.start-screen .game-options .level span, .start-screen .game-options .mode span {
+  color: white;
+  margin-right: 10px;
+}
+.start-screen .game-options .level select, .start-screen .game-options .mode select {
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: 20px;
+}
+
+.main-screen {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-image: radial-gradient(at right bottom, #476CFF, #FFEF5C);
+  transform: translateY(-100%);
+  transition: 1s ease-in-out;
+}
+.main-screen .game {
+  width: 70%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 64px;
+  position: relative;
+}
+.main-screen .game #game-board {
+  width: 100%;
+  height: 100%;
+  border: 8px solid white;
+  background-image: radial-gradient(at right bottom, #476CFF, #FFEF5C);
+}
+.main-screen .game .main-title {
+  padding-top: 4px;
+  text-align: center;
+  font-size: 30px;
+  font-weight: bold;
+  color: white;
+}
+.main-screen .game .menu {
+  display: inline-block;
+  position: absolute;
+  right: 64px;
+}
+.main-screen .game .menu .fa-circle-arrow-left, .main-screen .game .menu .fa-circle-pause, .main-screen .game .menu .fa-circle-play, .main-screen .game .menu .mute {
+  cursor: pointer;
+}
+.main-screen .game .menu .fa-circle-arrow-left:hover, .main-screen .game .menu .fa-circle-pause:hover, .main-screen .game .menu .fa-circle-play:hover, .main-screen .game .menu .mute:hover {
+  opacity: 0.8;
+  color: red;
+}
+.main-screen .game .restart, .main-screen .game .next-stage {
+  display: none;
+  position: absolute;
+  width: 35%;
+  height: 20%;
+  z-index: 8;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 5px;
+}
+.main-screen .game .restart h1, .main-screen .game .next-stage h1 {
+  padding-top: 10px;
+  color: red;
+  text-align: center;
+}
+.main-screen .game .restart .btn-restart, .main-screen .game .restart .btn-next, .main-screen .game .next-stage .btn-restart, .main-screen .game .next-stage .btn-next {
+  background: yellow;
+  border-radius: 5px;
+  color: black;
+  font-size: 20px;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px 0;
+  text-align: center;
+  cursor: pointer;
+  width: 35%;
+}
+.main-screen .game .restart .btn-restart:hover, .main-screen .game .restart .btn-next:hover, .main-screen .game .next-stage .btn-restart:hover, .main-screen .game .next-stage .btn-next:hover {
+  opacity: 0.8;
+  background: blue;
+}
+.main-screen .game-info {
+  width: 30%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 64px 64px 64px 0;
+}
+.main-screen .game-info .info {
+  width: 100%;
+  height: 100%;
+  border: 8px solid white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-image: radial-gradient(at right bottom, #476CFF, #FFEF5C);
+}
+.main-screen .game-info .info .score, .main-screen .game-info .info .level, .main-screen .game-info .info .goal, .main-screen .game-info .info .info-per-level {
+  margin-top: 16px;
+  font-size: 30px;
+  font-weight: bold;
+  color: white;
+}
+.main-screen .game-info .info .info-per-level {
+  margin-top: 32px;
+  color: white;
+}
+.main-screen .game-info .info .info-per-level .all-info {
+  font-size: 15px;
+  margin-top: 10px;
+  display: grid;
+  grid-row: 8;
+  grid-column: 2;
+  grid-row-gap: 20px;
+  grid-column-gap: 20px;
+}
+.main-screen .game-info .info .info-per-level .all-info .snake-info, .main-screen .game-info .info .info-per-level .all-info .food-info, .main-screen .game-info .info .info-per-level .all-info .wall-info, .main-screen .game-info .info .info-per-level .all-info .snake-head-info, .main-screen .game-info .info .info-per-level .all-info .wall-move-info, .main-screen .game-info .info .info-per-level .all-info .door-info, .main-screen .game-info .info .info-per-level .all-info .item-speed-up-info,
+.main-screen .game-info .info .info-per-level .all-info .item-speed-low-info, .main-screen .game-info .info .info-per-level .all-info .item-reverse-info, .main-screen .game-info .info .info-per-level .all-info .item-through-wall-info {
+  display: none;
+  align-items: center;
+  margin-top: 8px;
+}
+.main-screen .game-info .info .info-per-level .all-info .snake-info span, .main-screen .game-info .info .info-per-level .all-info .food-info span, .main-screen .game-info .info .info-per-level .all-info .wall-info span, .main-screen .game-info .info .info-per-level .all-info .snake-head-info span, .main-screen .game-info .info .info-per-level .all-info .wall-move-info span, .main-screen .game-info .info .info-per-level .all-info .door-info span, .main-screen .game-info .info .info-per-level .all-info .item-speed-up-info span,
+.main-screen .game-info .info .info-per-level .all-info .item-speed-low-info span, .main-screen .game-info .info .info-per-level .all-info .item-reverse-info span, .main-screen .game-info .info .info-per-level .all-info .item-through-wall-info span {
+  content: "";
+  width: 30px;
+  height: 30px;
+  display: block;
+  border-radius: 5px;
+  position: relative;
+}
+.main-screen .game-info .info .info-per-level .all-info .snake-head-info {
+  grid-row-start: 1;
+  grid-column-start: 1;
+}
+.main-screen .game-info .info .info-per-level .all-info .snake-head-info span {
+  background-image: url("images/snake-head-icon.png");
+  background-size: cover;
+  position: relative;
+  transform: scale(1.5);
+}
+.main-screen .game-info .info .info-per-level .all-info .snake-info {
+  grid-row-start: 2;
+  grid-column-start: 1;
+}
+.main-screen .game-info .info .info-per-level .all-info .snake-info span {
+  background-image: url("images/snake-body-icon.png");
+  background-size: cover;
+}
+.main-screen .game-info .info .info-per-level .all-info .food-info {
+  grid-row-start: 3;
+  grid-column-start: 1;
+}
+.main-screen .game-info .info .info-per-level .all-info .food-info span {
+  background-image: url("images/food-icon.png");
+  background-size: cover;
+}
+.main-screen .game-info .info .info-per-level .all-info .wall-info {
+  grid-row-start: 4;
+  grid-column-start: 1;
+}
+.main-screen .game-info .info .info-per-level .all-info .wall-info span {
+  background-image: url("images/wall-red-icon.png");
+  background-size: cover;
+}
+.main-screen .game-info .info .info-per-level .all-info .wall-move-info {
+  grid-row-start: 5;
+  grid-column-start: 1;
+}
+.main-screen .game-info .info .info-per-level .all-info .wall-move-info span {
+  background-image: url("images/wall-green-icon.png");
+  background-size: cover;
+}
+.main-screen .game-info .info .info-per-level .all-info .item-speed-up-info {
+  grid-row-start: 1;
+  grid-column-start: 2;
+}
+.main-screen .game-info .info .info-per-level .all-info .item-speed-up-info span {
+  background-image: url("images/speed-up-icon.png");
+  background-size: cover;
+}
+.main-screen .game-info .info .info-per-level .all-info .item-speed-low-info {
+  grid-row-start: 2;
+  grid-column-start: 2;
+}
+.main-screen .game-info .info .info-per-level .all-info .item-speed-low-info span {
+  background-image: url("images/speed-low-icon.png");
+  background-size: cover;
+}
+.main-screen .game-info .info .info-per-level .all-info .item-reverse-info {
+  grid-row-start: 3;
+  grid-column-start: 2;
+}
+.main-screen .game-info .info .info-per-level .all-info .item-reverse-info span {
+  background-image: url("images/reverse-icon.png");
+  background-size: cover;
+}
+.main-screen .game-info .info .info-per-level .all-info .item-through-wall-info {
+  grid-row-start: 4;
+  grid-column-start: 2;
+}
+.main-screen .game-info .info .info-per-level .all-info .item-through-wall-info span {
+  background-image: url("images/through-wall-icon.png");
+  background-size: cover;
+}
+.main-screen .game-info .info .info-per-level .all-info .door-info {
+  grid-row-start: 5;
+  grid-column-start: 2;
+}
+.main-screen .game-info .info .info-per-level .all-info .door-info span {
+  background-image: url("images/door-icon.png");
+  background-size: cover;
+  transform: scale(1.2);
+}
+.main-screen #game-board {
+  width: 100%;
+  height: 100%;
+  display: grid;
+}
+.main-screen #game-board .snake-head {
+  background-image: url("images/snake-head-icon.png");
+  background-size: cover;
+  position: relative;
+}
+.main-screen #game-board .head-left {
+  transform: translateX(-8px) rotate(90deg) scale(1.5);
+}
+.main-screen #game-board .head-up {
+  transform: translateY(-8px) rotate(180deg) scale(1.5);
+}
+.main-screen #game-board .head-right {
+  transform: translateX(8px) rotate(-90deg) scale(1.5);
+}
+.main-screen #game-board .head-down {
+  transform: translateY(8px) rotate(0deg) scale(1.5);
+}
+.main-screen #game-board .snake-body-segment {
+  background-image: url("images/snake-body-icon.png");
+  background-size: cover;
+}
+.main-screen #game-board .body-left {
+  transform: rotate(0deg) scale(1.1);
+}
+.main-screen #game-board .snake-body-fork {
+  background-image: url("images/snake-left-down.png");
+  background-size: cover;
+  transform: scale(0.7);
+}
+.main-screen #game-board .body-right {
+  transform: rotate(180deg) scale(1.1);
+}
+.main-screen #game-board .body-up {
+  transform: rotate(90deg) scale(1.1);
+}
+.main-screen #game-board .body-down {
+  transform: rotate(-90deg) scale(1.1);
+}
+.main-screen #game-board .snake-body-tail {
+  background-image: url("images/snake-tail-icon.png");
+  background-size: cover;
+}
+.main-screen #game-board .food {
+  background-image: url("images/food-icon.png");
+  background-size: cover;
+}
+.main-screen #game-board .item-speed-up {
+  background-image: url("images/speed-up-icon.png");
+  background-size: cover;
+}
+.main-screen #game-board .item-speed-low {
+  background-image: url("images/speed-low-icon.png");
+  background-size: cover;
+}
+.main-screen #game-board .item-reverse-direction {
+  background-image: url("images/reverse-icon.png");
+  background-size: cover;
+}
+.main-screen #game-board .item-through_wall {
+  background-image: url("images/through-wall-icon.png");
+  background-size: cover;
+}
+.main-screen #game-board .wall {
+  background-image: url("images/wall-red-icon.png");
+  background-size: cover;
+  transform: scale(1.2);
+}
+.main-screen #game-board .wall-move {
+  background-image: url("images/wall-green-icon.png");
+  background-size: cover;
+  transform: scale(1.2);
+}
+.main-screen #game-board .door {
+  background-image: url("images/door-icon.png");
+  background-size: cover;
+  transform: scale(1.2);
+}
+
+/*# sourceMappingURL=style.css.map */
