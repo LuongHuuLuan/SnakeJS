@@ -1,3 +1,5 @@
+import {MyGameLoop} from "./MyGameLoop.js";
+
 export class Item {
     hide = true;
 
@@ -48,7 +50,7 @@ export class Item {
                 }
             }
         }
-        if(door) {
+        if (door) {
             if (isConflict === false) {
                 for (let i = 0; i < door.doorsIn.length; i++) {
                     let d = door.doorsIn[i];

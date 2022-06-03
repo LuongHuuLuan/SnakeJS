@@ -1,4 +1,5 @@
 import {Game} from "./Game.js";
+import {MyGameLoop} from "./MyGameLoop.js";
 
 $(document).ready(function () {
     const game = new Game();

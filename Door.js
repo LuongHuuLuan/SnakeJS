@@ -89,7 +89,7 @@ export class Door {
     }
 
     delete() {
-        $("#game-board .wall").remove();
+        $("#game-board .door").remove();
     }
 
 }

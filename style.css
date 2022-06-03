@@ -311,11 +311,6 @@ body {
 .main-screen #game-board .body-left {
   transform: rotate(0deg) scale(1.1);
 }
-.main-screen #game-board .snake-body-fork {
-  background-image: url("images/snake-left-down.png");
-  background-size: cover;
-  transform: scale(0.7);
-}
 .main-screen #game-board .body-right {
   transform: rotate(180deg) scale(1.1);
 }

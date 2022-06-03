@@ -10,6 +10,7 @@ export class Snake {
         this.head.direction = direction;
         this.reverseDirection = false;
         this.isThroughWall = false;
+        this.isDie = false;
         this.createBody(2);
     }
 
@@ -92,58 +93,42 @@ export class Snake {
         }
     }
 
-    move(gameBoard) {
+    move() {
         //move body
         // gan phan than hien tai bang phan than phia truoc
-        this.lastDirection = this.direction;
-        this.tail.x = this.body[this.body.length - 1].x;
-        this.tail.y = this.body[this.body.length - 1].y;
-        for (let i = this.body.length - 1; i >= 0; i--) {
-            if (i === 0) {
-                this.body[0].x = this.head.x;
-                this.body[0].y = this.head.y;
-                this.body[0].direction = this.getDirection(this.head.direction);
-            } else {
-                this.body[i].x = this.body[i - 1].x;
-                this.body[i].y = this.body[i - 1].y;
-                this.body[i].direction = this.getDirection(this.body[i - 1].direction);
+        if (!this.isDie) {
+            this.lastDirection = this.direction;
+            this.tail.x = this.body[this.body.length - 1].x;
+            this.tail.y = this.body[this.body.length - 1].y;
+            for (let i = this.body.length - 1; i >= 0; i--) {
+                if (i === 0) {
+                    this.body[0].x = this.head.x;
+                    this.body[0].y = this.head.y;
+                    this.body[0].direction = this.getDirection(this.head.direction);
+                } else {
+                    this.body[i].x = this.body[i - 1].x;
+                    this.body[i].y = this.body[i - 1].y;
+                    this.body[i].direction = this.getDirection(this.body[i - 1].direction);
+                }
+            }
+            // move head
+            const convertDirection = this.convertDirection(this.lastDirection);
+            this.head.x = this.head.x + convertDirection[0];
+            this.head.y = this.head.y + convertDirection[1];
+            this.head.direction = this.lastDirection;
+            if (this.head.x > this.enviromentSize.width) {
+                this.head.x = 1;
+            }
+            if (this.head.x < 1) {
+                this.head.x = this.enviromentSize.width;
+            }
+            if (this.head.y > this.enviromentSize.height) {
+                this.head.y = 1;
+            }
+            if (this.head.y < 1) {
+                this.head.y = this.enviromentSize.height;
             }
         }
-        // move head
-        const convertDirection = this.convertDirection(this.lastDirection);
-        this.head.x = this.head.x + convertDirection[0];
-        this.head.y = this.head.y + convertDirection[1];
-        this.head.direction = this.lastDirection;
-        if (this.head.x > this.enviromentSize.width) {
-            this.head.x = 1;
-        }
-        if (this.head.x < 1) {
-            this.head.x = this.enviromentSize.width;
-        }
-        if (this.head.y > this.enviromentSize.height) {
-            this.head.y = 1;
-        }
-        if (this.head.y < 1) {
-            this.head.y = this.enviromentSize.height;
-        }
-        this.delete();
-        this.draw(gameBoard);
-    }
-
-    moveBack(gameBoard) {
-        this.head.x = this.body[0].x;
-        this.head.y = this.body[0].y;
-        for (let i = 0; i < this.body.length; i++) {
-            if (i === this.body.length - 1) {
-                this.body[i].x = this.tail.x;
-                this.body[i].y = this.tail.y;
-            } else {
-                this.body[i].x = this.body[i + 1].x;
-                this.body[i].y = this.body[i + 1].y;
-            }
-        }
-        this.delete();
-        this.draw(gameBoard);
     }
 
     delete() {
@@ -198,45 +183,42 @@ export class Snake {
     }
 
     checkBound() {
-        let isDie = false;
         for (let i = 0; i < this.body.length; i++) {
             if (this.head.x === this.body[i].x && this.head.y === this.body[i].y) {
-                isDie = true;
+                this.isDie = true;
                 break;
             }
         }
-        return isDie;
+        return this.isDie;
     }
 
     checkHitWall(wall) {
-        let isDie = false;
         if (!this.isThroughWall) {
             let bricks = wall.bricks;
             for (let i = 0; i < bricks.length; i++) {
                 if (this.head.x === bricks[i].x && this.head.y === bricks[i].y) {
-                    isDie = true;
+                    this.isDie = true;
                     break;
                 }
             }
         }
-        return isDie;
+        return this.isDie;
     }
 
     bodyConflictWall(wallMove) {
-        let isDie = false;
         if (!this.isThroughWall) {
             let bricks = wallMove.bricks;
             for (let i = 0; i < this.body.length; i++) {
                 for (let j = 0; j < bricks.length; j++) {
                     if (this.body[i].x === bricks[j].x && this.body[i].y === bricks[j].y) {
-                        isDie = true;
+                        this.isDie = true;
                         break;
                     }
                 }
-                if (isDie) break;
+                if (this.isDie) break;
             }
         }
-        return isDie;
+        return this.isDie;
     }
 
     throwWall() {

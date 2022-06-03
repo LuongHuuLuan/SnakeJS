@@ -1,5 +1,4 @@
 export class Wall {
-    // a wall have many brick
     constructor(bricks) {
         this.bricks = bricks;
     }

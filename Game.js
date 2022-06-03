@@ -5,6 +5,7 @@ import {Wall} from "./Wall.js";
 import {WallMove} from "./WallMove.js";
 import {Item} from "./Item.js";
 import {Door} from "./Door.js";
+import {MyGameLoop} from "./MyGameLoop.js";
 
 export class Game {
     GAME_WIDTH = 25;
@@ -26,12 +27,15 @@ export class Game {
     setUp() {
         this.foodEaten = 0;
         this.SCORE = 0;
-        this.isDie = false;
         this.isPlaying = false;
         this.isWin = false;
         this.gameBoard = new GameBoard(this.GAME_WIDTH, this.GAME_HEIGHT);
         this.snake = new Snake(2, {x: 10, y: 5}, {width: this.GAME_WIDTH, height: this.GAME_HEIGHT}, "LEFT");
+        this.snake.isDie = false;
         this.food = new Food({width: this.GAME_WIDTH, height: this.GAME_HEIGHT});
+        this.gameLoop = new MyGameLoop("Interval");
+        this.itemLoop = new MyGameLoop();
+        this.wallMoveLoop = new MyGameLoop("Interval");
         switch (this.level) {
             case 1:
                 this.level1();
@@ -55,38 +59,34 @@ export class Game {
     }
 
     play() {
-        if (!this.isPlaying && !this.isDie && !this.isWin) {
+        if (!this.isPlaying && !this.snake.isDie && !this.isWin) {
             this.isPlaying = true;
-            this.myInterval = setInterval(() => {
-                this.playing();
+            this.gameLoop.loop(() => {
+                this.playing()
             }, 500 / this.snake.speed);
-
             if (this.wallMove) {
-                this.wallInterval = setInterval(() => {
-                    if (this.wallMove.bricks.length !== 0) {
-                        this.wallMove.move(this.gameBoard, this.snake);
-                    }
+                this.wallMoveLoop = new MyGameLoop("Interval");
+                this.wallMoveLoop.loop(() => {
+                    this.wallMove.move(this.gameBoard, this.snake);
+                    this.wallMove.delete();
+                    this.wallMove.draw(this.gameBoard);
                 }, 500 / this.wallMove.speed);
             }
             if (this.item && !this.item.hide) {
-                this.itemTimeout = setTimeout(() => {
-                    this.item.delete();
-                    this.item.isHide();
-                    clearTimeout(this.itemTimeout);
-                }, 5000);
+                this.itemLoop.resume();
             }
         }
     }
 
     pause() {
-        if (this.isPlaying && !this.isDie && !this.isWin) {
+        if (this.isPlaying && !this.isWin) {
             this.isPlaying = false;
-            clearInterval(this.myInterval);
+            this.gameLoop.pause();
             if (this.wallMove) {
-                clearInterval(this.wallInterval);
+                this.wallMoveLoop.pause();
             }
             if (this.item && !this.item.hide) {
-                clearTimeout(this.itemTimeout);
+                this.itemLoop.pause();
             }
         }
     }
@@ -97,9 +97,9 @@ export class Game {
     }
 
     changeSpeed() {
-        clearInterval(this.myInterval);
-        this.myInterval = setInterval(() => {
-            this.playing();
+        this.gameLoop.clear();
+        this.gameLoop.loop(() => {
+            this.playing()
         }, 500 / this.snake.speed);
     }
 
@@ -107,40 +107,26 @@ export class Game {
         if (this.door) {
             this.door.translate(this.snake, this.wall);
         }
-        this.snake.move(this.gameBoard);
-        if (this.snake.checkBound()) {
-            this.dieAudio.play();
-            this.snake.moveBack(this.gameBoard);
+        this.snake.move();
+        if (!this.snake.isDie) {
+            this.snake.checkBound();
+            if (this.wall)
+                this.snake.checkHitWall(this.wall);
+            if (this.wallMove) {
+                this.snake.checkHitWall(this.wallMove);
+                this.snake.bodyConflictWall(this.wallMove);
+            }
+            if (!this.snake.isDie) {
+                this.snake.delete();
+                this.snake.draw(this.gameBoard);
+            }
+        } else {
+            if (!this.isMute)
+                this.dieAudio.play();
             this.pause();
-            this.isDie = true;
-            this.isPlaying = false;
             $(".main-screen .game .restart").css("display", "block");
         }
-        if (this.wall) {
-            if (this.snake.checkHitWall(this.wall)) {
-                if (!this.isMute) {
-                    this.dieAudio.play();
-                }
-                this.snake.moveBack(this.gameBoard);
-                this.pause();
-                this.isDie = true;
-                this.isPlaying = false;
-                $(".main-screen .game .restart").css("display", "block");
-            }
-        }
-        if (this.wallMove) {
-            if (this.snake.checkHitWall(this.wallMove) || this.snake.bodyConflictWall(this.wallMove)) {
-                if (!this.isMute) {
-                    this.dieAudio.play();
-                }
-                this.snake.moveBack(this.gameBoard);
-                this.pause();
-                this.isDie = true;
-                this.isPlaying = false;
-                $(".main-screen .game .restart").css("display", "block");
-            }
-        }
-        if (this.snake.checkEat(this.food) && !this.isDie) {
+        if (this.snake.checkEat(this.food)) {
             if (!this.isMute) {
                 this.eatAudio.play();
             }
@@ -148,10 +134,10 @@ export class Game {
                 this.foodEaten = (this.foodEaten + 1) % 3;
                 if (this.foodEaten === 2) {
                     this.item.spawn(this.snake, this.gameBoard, this.food, this.wall, this.wallMove, this.door);
-                    this.itemTimeout = setTimeout(() => {
+                    this.itemLoop.loop(() => {
                         this.item.delete();
                         this.item.isHide();
-                        clearTimeout(this.itemTimeout);
+                        this.itemLoop.clear();
                     }, 5000);
                 }
             }
@@ -163,13 +149,13 @@ export class Game {
             $(".score span").text(this.SCORE);
         }
         if (this.item) {
-            if (this.snake.checkEat(this.item) && !this.isDie) {
+            if (this.snake.checkEat(this.item) && !this.snake.isDie) {
                 if (!this.isMute) {
                     this.eatAudio.play();
                 }
                 this.item.effect(this.snake);
                 this.changeSpeed();
-                clearTimeout(this.itemTimeout);
+                this.itemLoop.clear();
                 this.item.delete();
                 this.item.isHide();
                 this.foodEaten = 0;
@@ -188,21 +174,24 @@ export class Game {
 
     stage(level) {
         this.level = level;
-        if (this.level > 6) {
+        if (this.level > 5) {
             this.level = 1;
         }
-        clearInterval(this.myInterval);
+        this.gameLoop.clear();
         this.snake.delete();
         this.food.delete();
         if (this.wall)
             this.wall.delete();
         if (this.wallMove) {
             this.wallMove.delete();
-            clearInterval(this.wallInterval);
+            this.wallMoveLoop.clear();
         }
         if (this.item) {
             this.item.delete();
-            clearTimeout(this.itemTimeout);
+            this.itemLoop.clear();
+        }
+        if (this.door) {
+            this.door.delete();
         }
         this.setUp();
         this.snake.draw(this.gameBoard);
@@ -244,7 +233,7 @@ export class Game {
                     }
                     break;
                 case "Enter":
-                    if (_this.isDie) {
+                    if (_this.snake.isDie) {
                         _this.restart();
                     }
                     if (_this.isWin) {
@@ -287,12 +276,25 @@ export class Game {
                 snakeHeadInfo.css("display", "flex");
                 snakeBodyInfo.css("display", "flex");
                 foodInfo.css("display", "flex");
+                wallInfo.css("display", "none");
+                wallMoveInfo.css("display", "none");
+                itemSpeedUpInfo.css("display", "none");
+                itemSpeedLowInfo.css("display", "none");
+                itemReverseInfo.css("display", "none");
+                itemThroughWallInfo.css("display", "none");
+                doorInfo.css("display", "none");
                 break;
             case 2:
                 snakeHeadInfo.css("display", "flex");
                 snakeBodyInfo.css("display", "flex");
                 foodInfo.css("display", "flex");
                 wallInfo.css("display", "flex");
+                wallMoveInfo.css("display", "none");
+                itemSpeedUpInfo.css("display", "none");
+                itemSpeedLowInfo.css("display", "none");
+                itemReverseInfo.css("display", "none");
+                itemThroughWallInfo.css("display", "none");
+                doorInfo.css("display", "none");
                 break;
             case 3:
                 snakeHeadInfo.css("display", "flex");
@@ -300,6 +302,11 @@ export class Game {
                 foodInfo.css("display", "flex");
                 wallInfo.css("display", "flex");
                 wallMoveInfo.css("display", "flex");
+                itemSpeedUpInfo.css("display", "none");
+                itemSpeedLowInfo.css("display", "none");
+                itemReverseInfo.css("display", "none");
+                itemThroughWallInfo.css("display", "none");
+                doorInfo.css("display", "none");
                 break;
             case 4:
                 snakeHeadInfo.css("display", "flex");
@@ -311,6 +318,7 @@ export class Game {
                 itemSpeedLowInfo.css("display", "flex");
                 itemReverseInfo.css("display", "flex");
                 itemThroughWallInfo.css("display", "flex");
+                doorInfo.css("display", "none");
                 break;
             case 5:
                 snakeHeadInfo.css("display", "flex");
@@ -333,12 +341,19 @@ export class Game {
         this.GOAL = 200;
         this.snake.draw(this.gameBoard);
         this.food.spawn(this.snake, this.gameBoard);
+        this.wall = null;
+        this.wallMove = null
+        this.item = null;
+        this.door = null;
         this.displayInfo();
     }
 
     level2() {
         this.GOAL = 250;
         this.wall = new Wall([]);
+        this.wallMove = null
+        this.item = null;
+        this.door = null;
         for (let i = 1; i <= this.GAME_WIDTH; i++) {
             for (let j = 1; j <= this.GAME_HEIGHT; j++) {
                 if (i === 1 || i === this.GAME_WIDTH || j === 1 || j === this.GAME_HEIGHT) {
@@ -356,6 +371,8 @@ export class Game {
         this.GOAL = 300;
         this.wall = new Wall([]);
         this.wallMove = new WallMove([], "RIGHT", 2);
+        this.item = null;
+        this.door = null;
         for (let i = 1; i <= this.GAME_WIDTH; i++) {
             for (let j = 1; j <= this.GAME_HEIGHT; j++) {
                 if (i === 1 || i === this.GAME_WIDTH || j === 1 || j === this.GAME_HEIGHT) {
@@ -380,6 +397,7 @@ export class Game {
         this.wall = new Wall([]);
         this.wallMove = new WallMove([], "DOWN", 2);
         this.item = new Item({width: this.GAME_WIDTH, height: this.GAME_HEIGHT});
+        this.door = null;
         let x = Math.floor(this.GAME_HEIGHT / 2);
         for (let i = 1; i <= this.GAME_WIDTH; i++) {
             for (let j = 1; j <= this.GAME_HEIGHT; j++) {
@@ -403,7 +421,7 @@ export class Game {
     }
 
     level5() {
-        this.GOAL = 400;
+        this.GOAL = 350;
         this.door = new Door();
         this.snake = new Snake(2, {x: 10, y: 3}, {width: this.GAME_WIDTH, height: this.GAME_HEIGHT}, "LEFT");
         this.wall = new Wall([]);

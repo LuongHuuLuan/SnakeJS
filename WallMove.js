@@ -27,65 +27,55 @@ export class WallMove {
 
     move(gameBoard, snake) {
         if (this.bricks.length !== 0) {
-            let convertDirection = this.convertDirection(this.direction);
-            let brickFirst = this.bricks[0];
-            let brickLast = this.bricks[this.bricks.length - 1];
-            for (let i = 0; i < snake.body.length; i++) {
-                if (this.direction === "LEFT" || this.direction === "RIGHT") {
-                    if (brickFirst.x - 2 === snake.body[i].x && brickLast.y === snake.body[i].y) {
-                        console.log("brick: " + brickFirst.x + ", " + brickFirst.y);
-                        console.log("snake: " + snake.body[i].x + ", " + snake.body[i].y);
-                        console.log(this.direction)
-                        this.direction = "RIGHT";
-                        break;
+            if (!snake.isDie) {
+                let convertDirection = this.convertDirection(this.direction);
+                let brickFirst = this.bricks[0];
+                let brickLast = this.bricks[this.bricks.length - 1];
+                for (let i = 0; i < snake.body.length; i++) {
+                    if (this.direction === "LEFT" || this.direction === "RIGHT") {
+                        if (brickFirst.x - 2 === snake.body[i].x && brickLast.y === snake.body[i].y) {
+                            this.direction = "RIGHT";
+                            break;
+                        }
+                        if (brickLast.x + 2 === snake.body[i].x && brickLast.y === snake.body[i].y) {
+                            this.direction = "LEFT";
+                            break;
+                        }
                     }
-                    if (brickLast.x + 2 === snake.body[i].x && brickLast.y === snake.body[i].y) {
-                        console.log("brick: " + brickFirst.x + ", " + brickFirst.y);
-                        console.log("snake: " + snake.body[i].x + ", " + snake.body[i].y);
-                        console.log(this.direction)
+                    if (this.direction === "UP" || this.direction === "DOWN") {
+                        if (brickFirst.y - 2 === snake.body[i].y && brickLast.x === snake.body[i].x) {
+                            this.direction = "DOWN";
+                            break;
+                        }
+                        if (brickLast.y + 2 === snake.body[i].y && brickLast.x === snake.body[i].x) {
+                            this.direction = "UP";
+                            break;
+                        }
+                    }
+                }
+                if (this.direction === "LEFT" || this.direction === "RIGHT") {
+                    if (brickLast.x === gameBoard.width) {
                         this.direction = "LEFT";
-                        break;
+                    }
+                    if (brickFirst.x === 1) {
+                        this.direction = "RIGHT";
                     }
                 }
                 if (this.direction === "UP" || this.direction === "DOWN") {
-                    if (brickFirst.y - 2 === snake.body[i].y && brickLast.x === snake.body[i].x) {
-                        console.log("brick: " + brickFirst.x + ", " + brickFirst.y);
-                        console.log("snake: " + snake.body[i].x + ", " + snake.body[i].y);
-                        console.log(this.direction)
-                        this.direction = "DOWN";
-                        break;
-                    }
-                    if (brickLast.y + 2 === snake.body[i].y && brickLast.x === snake.body[i].x) {
-                        console.log("brick: " + brickFirst.x + ", " + brickFirst.y);
-                        console.log("snake: " + snake.body[i].x + ", " + snake.body[i].y);
-                        console.log(this.direction)
+                    if (brickLast.y === gameBoard.height) {
                         this.direction = "UP";
-                        break;
+                    }
+                    if (brickFirst.y === 1) {
+                        this.direction = "DOWN";
                     }
                 }
+                this.bricks.forEach(brick => {
+                    brick.x = brick.x + convertDirection[0];
+                    brick.y = brick.y + convertDirection[1];
+                })
+                // this.delete();
+                // this.draw(gameBoard);
             }
-            if (this.direction === "LEFT" || this.direction === "RIGHT") {
-                if (brickLast.x === gameBoard.width) {
-                    this.direction = "LEFT";
-                }
-                if (brickFirst.x === 1) {
-                    this.direction = "RIGHT";
-                }
-            }
-            if (this.direction === "UP" || this.direction === "DOWN") {
-                if (brickLast.y === gameBoard.height) {
-                    this.direction = "UP";
-                }
-                if (brickFirst.y === 1) {
-                    this.direction = "DOWN";
-                }
-            }
-            this.bricks.forEach(brick => {
-                brick.x = brick.x + convertDirection[0];
-                brick.y = brick.y + convertDirection[1];
-            })
-            this.delete();
-            this.draw(gameBoard);
         }
     }
 
